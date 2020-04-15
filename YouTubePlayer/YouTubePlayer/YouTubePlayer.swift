@@ -361,6 +361,8 @@ extension YouTubePlayerView: WKNavigationDelegate {
     public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if let url = webView.url, url.scheme == "ytplayer" {
             handleJSEvent(url)
+            decisionHandler(.cancel)
+            return
         }
         decisionHandler(.allow)
     }
