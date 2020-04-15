@@ -94,6 +94,7 @@ open class YouTubePlayerView: UIView {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaPlaybackRequiresUserAction = false
+        config.preferences.javaScriptEnabled = true
         return config
     }()
     fileprivate var webView: WKWebView!
