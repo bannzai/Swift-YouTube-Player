@@ -88,6 +88,12 @@ open class YouTubePlayerView: UIView {
     public typealias YouTubePlayerParameters = [String: AnyObject]
     public var baseURL = "about:blank"
     
+    private let configuration: WKWebViewConfiguration = {
+        let config = WKWebViewConfiguration()
+        config.allowsInlineMediaPlayback = true
+        config.mediaPlaybackRequiresUserAction = false
+        return config
+    }()
     fileprivate var webView: WKWebView!
     
     /** The readiness of the player */
@@ -131,12 +137,10 @@ open class YouTubePlayerView: UIView {
     // MARK: Web view initialization
     
     fileprivate func buildWebView(_ parameters: [String: AnyObject]) {
-        webView = UIWebView()
+        webView = WKWebView.init(frame: bounds, configuration: configuration)
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
-        webView.allowsInlineMediaPlayback = true
-        webView.mediaPlaybackRequiresUserAction = false
-        webView.delegate = self
+        webView.navigationDelegate = self
         webView.scrollView.isScrollEnabled = false
     }
     
