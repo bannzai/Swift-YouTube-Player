@@ -219,7 +219,7 @@ open class YouTubePlayerView: UIView {
         evaluatePlayerCommand("nextVideo()", completion: completion)
     }
     
-    @discardableResult fileprivate func evaluatePlayerCommand(_ command: String, completion: YoutubePlayerViewEvaluatedCallbackType?) -> String? {
+    @discardableResult fileprivate func evaluatePlayerCommand(_ command: String, completion: YoutubePlayerViewEvaluatedCallbackType?) {
         let fullCommand = "player." + command + ";"
         webView.evaluateJavaScript(fullCommand) { (value, error) in
             switch (value, error) {
