@@ -55,15 +55,39 @@ class ViewController: UIViewController {
     }
     
     @IBAction func currentTime(sender: UIButton) {
-        let title = String(format: "Current Time %@", playerView.getCurrentTime() ?? "0")
-        currentTimeButton.setTitle(title, for: .normal)
+        playerView.getCurrentTime { [weak self] result in
+            switch result {
+            case .success(let value):
+                let title: String
+                if let value = value as? String {
+                    title = String(format: "Current Time %@", value)
+                } else {
+                    title = "Missing Current Time"
+                }
+                self?.currentTimeButton.setTitle(title, for: .normal)
+            case .failure(let error):
+                print("[ERROR]", error.localizedDescription)
+            }
+        }
     }
     
     @IBAction func duration(sender: UIButton) {
-        let title = String(format: "Duration %@", playerView.getDuration() ?? "0")
-        durationButton.setTitle(title, for: .normal)
+        playerView.getDuration { [weak self] result in
+            switch result {
+            case .success(let value):
+                let title: String
+                if let value = value as? String {
+                    title = String(format: "Duration %@", value)
+                } else {
+                    title = "Missing Duration"
+                }
+                self?.durationButton.setTitle(title, for: .normal)
+            case .failure(let error):
+                print("[ERROR]", error.localizedDescription)
+            }
+        }
     }
-
+    
     func showAlert(message: String) {
         self.present(alertWithMessage(message: message), animated: true, completion: nil)
     }
