@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import WebKit
 
 public enum YouTubePlayerState: String {
     case Unstarted = "-1"
@@ -81,13 +82,22 @@ public func videoIDFromYouTubeURL(_ videoURL: URL) -> String? {
     return videoURL.queryStringComponents()["v"] as? String
 }
 
+public struct YoutubePlayerViewEvaluatedUnknownError: Error { }
+public typealias YoutubePlayerViewEvaluatedCallbackType = (Result<Any, Error>) -> Void
 /** Embed and control YouTube videos */
-open class YouTubePlayerView: UIView, UIWebViewDelegate {
+open class YouTubePlayerView: UIView {
     
     public typealias YouTubePlayerParameters = [String: AnyObject]
     public var baseURL = "about:blank"
     
-    fileprivate var webView: UIWebView!
+    private let configuration: WKWebViewConfiguration = {
+        let config = WKWebViewConfiguration()
+        config.allowsInlineMediaPlayback = true
+        config.mediaPlaybackRequiresUserAction = false
+        config.preferences.javaScriptEnabled = true
+        return config
+    }()
+    fileprivate var webView: WKWebView!
     
     /** The readiness of the player */
     fileprivate(set) open var ready = false
@@ -130,12 +140,10 @@ open class YouTubePlayerView: UIView, UIWebViewDelegate {
     // MARK: Web view initialization
     
     fileprivate func buildWebView(_ parameters: [String: AnyObject]) {
-        webView = UIWebView()
+        webView = WKWebView.init(frame: bounds, configuration: configuration)
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
-        webView.allowsInlineMediaPlayback = true
-        webView.mediaPlaybackRequiresUserAction = false
-        webView.delegate = self
+        webView.navigationDelegate = self
         webView.scrollView.isScrollEnabled = false
     }
     
@@ -166,55 +174,64 @@ open class YouTubePlayerView: UIView, UIWebViewDelegate {
     
     // MARK: Player controls
     
-    open func mute() {
-        evaluatePlayerCommand("mute()")
+    open func mute(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("mute()", completion: completion)
     }
     
-    open func unMute() {
-        evaluatePlayerCommand("unMute()")
+    open func unMute(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("unMute()", completion: completion)
     }
     
-    open func play() {
-        evaluatePlayerCommand("playVideo()")
+    open func play(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("playVideo()", completion: completion)
     }
     
-    open func pause() {
-        evaluatePlayerCommand("pauseVideo()")
+    open func pause(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("pauseVideo()", completion: completion)
     }
     
-    open func stop() {
-        evaluatePlayerCommand("stopVideo()")
+    open func stop(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("stopVideo()", completion: completion)
     }
     
-    open func clear() {
-        evaluatePlayerCommand("clearVideo()")
+    open func clear(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("clearVideo()", completion: completion)
     }
     
-    open func seekTo(_ seconds: Float, seekAhead: Bool) {
-        evaluatePlayerCommand("seekTo(\(seconds), \(seekAhead))")
+    open func seekTo(_ seconds: Float, seekAhead: Bool, completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("seekTo(\(seconds), \(seekAhead))", completion: completion)
     }
     
-    open func getDuration() -> String? {
-        return evaluatePlayerCommand("getDuration()")
+    open func getDuration(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("getDuration()", completion: completion)
     }
     
-    open func getCurrentTime() -> String? {
-        return evaluatePlayerCommand("getCurrentTime()")
+    open func getCurrentTime(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("getCurrentTime()", completion: completion)
     }
     
     // MARK: Playlist controls
     
-    open func previousVideo() {
-        evaluatePlayerCommand("previousVideo()")
+    open func previousVideo(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("previousVideo()", completion: completion)
     }
     
-    open func nextVideo() {
-        evaluatePlayerCommand("nextVideo()")
+    open func nextVideo(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("nextVideo()", completion: completion)
     }
     
-    @discardableResult fileprivate func evaluatePlayerCommand(_ command: String) -> String? {
+    fileprivate func evaluatePlayerCommand(_ command: String, completion: YoutubePlayerViewEvaluatedCallbackType?) {
         let fullCommand = "player." + command + ";"
-        return webView.stringByEvaluatingJavaScript(from: fullCommand)
+        webView.evaluateJavaScript(fullCommand) { (value, error) in
+            switch (value, error) {
+            case (_, let error?):
+                completion?(.failure(error))
+            case (let value?, _):
+                completion?(.success(value))
+            case (nil, nil):
+                completion?(.failure(YoutubePlayerViewEvaluatedUnknownError()))
+            }
+        }
     }
     
     
@@ -339,16 +356,16 @@ open class YouTubePlayerView: UIView, UIWebViewDelegate {
     }
     
     
-    // MARK: UIWebViewDelegate
-    
-    open func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebView.NavigationType) -> Bool {
-        
-        let url = request.url
-        
-        // Check if ytplayer event and, if so, pass to handleJSEvent
-        if let url = url, url.scheme == "ytplayer" { handleJSEvent(url) }
-        
-        return true
+}
+
+extension YouTubePlayerView: WKNavigationDelegate {
+    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if let url = navigationAction.request.url, url.scheme == "ytplayer" {
+            handleJSEvent(url)
+            decisionHandler(.cancel)
+            return
+        }
+        decisionHandler(.allow)
     }
 }
 
