@@ -47,11 +47,11 @@ class ViewController: UIViewController {
             "controls": "0",
             "showinfo": "0"
             ] as YouTubePlayerView.YouTubePlayerParameters
-        playerView.loadVideoID("wQg3bXrVLtg")
+        playerView.loadVideoID("e-KPO3kzy-M")
     }
 
     @IBAction func loadPlaylist(sender: UIButton) {
-        playerView.loadPlaylistID("RDe-ORhEE9VVg")
+        playerView.loadPlaylistID("PLwkHn4Vusy9V5mshCt5HF6bMZoROoGbhc")
     }
     
     @IBAction func currentTime(sender: UIButton) {
