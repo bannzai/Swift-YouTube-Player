@@ -173,50 +173,50 @@ open class YouTubePlayerView: UIView {
     
     // MARK: Player controls
     
-    open func mute() {
-        evaluatePlayerCommand("mute()")
+    open func mute(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("mute()", completion: completion)
     }
     
-    open func unMute() {
-        evaluatePlayerCommand("unMute()")
+    open func unMute(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("unMute()", completion: completion)
     }
     
-    open func play() {
-        evaluatePlayerCommand("playVideo()")
+    open func play(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("playVideo()", completion: completion)
     }
     
-    open func pause() {
-        evaluatePlayerCommand("pauseVideo()")
+    open func pause(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("pauseVideo()", completion: completion)
     }
     
-    open func stop() {
-        evaluatePlayerCommand("stopVideo()")
+    open func stop(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("stopVideo()", completion: completion)
     }
     
-    open func clear() {
-        evaluatePlayerCommand("clearVideo()")
+    open func clear(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("clearVideo()", completion: completion)
     }
     
-    open func seekTo(_ seconds: Float, seekAhead: Bool) {
-        evaluatePlayerCommand("seekTo(\(seconds), \(seekAhead))")
+    open func seekTo(_ seconds: Float, seekAhead: Bool, completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("seekTo(\(seconds), \(seekAhead))", completion: completion)
     }
     
-    open func getDuration() -> String? {
-        return evaluatePlayerCommand("getDuration()")
+    open func getDuration(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("getDuration()", completion: completion)
     }
     
-    open func getCurrentTime() -> String? {
-        return evaluatePlayerCommand("getCurrentTime()")
+    open func getCurrentTime(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("getCurrentTime()", completion: completion)
     }
     
     // MARK: Playlist controls
     
-    open func previousVideo() {
-        evaluatePlayerCommand("previousVideo()")
+    open func previousVideo(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("previousVideo()", completion: completion)
     }
     
-    open func nextVideo() {
-        evaluatePlayerCommand("nextVideo()")
+    open func nextVideo(completion: YoutubePlayerViewEvaluatedCallbackType? = nil) {
+        evaluatePlayerCommand("nextVideo()", completion: completion)
     }
     
     @discardableResult fileprivate func evaluatePlayerCommand(_ command: String, completion: YoutubePlayerViewEvaluatedCallbackType?) -> String? {
