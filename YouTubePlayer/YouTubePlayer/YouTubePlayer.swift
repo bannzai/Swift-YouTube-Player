@@ -340,16 +340,14 @@ open class YouTubePlayerView: UIView {
     }
     
     
-    // MARK: UIWebViewDelegate
-    
-    open func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebView.NavigationType) -> Bool {
-        
-        let url = request.url
-        
-        // Check if ytplayer event and, if so, pass to handleJSEvent
-        if let url = url, url.scheme == "ytplayer" { handleJSEvent(url) }
-        
-        return true
+}
+
+extension YouTubePlayerView: WKNavigationDelegate {
+    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if let url = webView.url, url.scheme == "ytplayer" {
+            handleJSEvent(url)
+        }
+        decisionHandler(.allow)
     }
 }
 
