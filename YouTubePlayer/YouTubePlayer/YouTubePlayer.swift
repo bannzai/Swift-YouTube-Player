@@ -82,6 +82,8 @@ public func videoIDFromYouTubeURL(_ videoURL: URL) -> String? {
     return videoURL.queryStringComponents()["v"] as? String
 }
 
+public struct YoutubePlayerViewEvaluatedUnknownError: Error { }
+public typealias YoutubePlayerViewEvaluatedCallbackType = (Result<Any, Error>) -> Void
 /** Embed and control YouTube videos */
 open class YouTubePlayerView: UIView {
     
@@ -217,9 +219,18 @@ open class YouTubePlayerView: UIView {
         evaluatePlayerCommand("nextVideo()")
     }
     
-    @discardableResult fileprivate func evaluatePlayerCommand(_ command: String) -> String? {
+    @discardableResult fileprivate func evaluatePlayerCommand(_ command: String, completion: YoutubePlayerViewEvaluatedCallbackType?) -> String? {
         let fullCommand = "player." + command + ";"
-        return webView.stringByEvaluatingJavaScript(from: fullCommand)
+        webView.evaluateJavaScript(fullCommand) { (value, error) in
+            switch (value, error) {
+            case (_, let error?):
+                completion?(.failure(error))
+            case (let value?, _):
+                completion?(.success(value))
+            case (nil, nil):
+                completion?(.failure(YoutubePlayerViewEvaluatedUnknownError()))
+            }
+        }
     }
     
     
